@@ -1,3 +1,4 @@
+require("dotenv").config();
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import fileupload from "express-fileupload";
@@ -7,7 +8,7 @@ import HttpException from "./utils/HttpExceptions";
 import SiaService from "./services/sia.service";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 const siaService = new SiaService();
 
 app.use(cors());
