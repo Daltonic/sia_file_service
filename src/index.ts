@@ -28,12 +28,11 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
 // Set up a route for file uploads
 app.post('/upload', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!res.locals.user) {
-      throw new HttpException(
-        StatusCodes.UNAUTHORIZED,
-        'Invalid Authorization Key'
-      )
-    }
+    // if (!res.locals.user) {
+    //   next(
+    //     new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
+    //   )
+    // }
 
     if (!req.files) {
       throw new HttpException(StatusCodes.NO_CONTENT, 'No file uploaded')
@@ -71,11 +70,11 @@ app.get(
 app.get(
   '/download/:folder/:fileId',
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!res.locals.user) {
-      next(
-        new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
-      )
-    }
+    // if (!res.locals.user) {
+    //   next(
+    //     new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
+    //   )
+    // }
 
     const { folder, fileId } = req.params
     try {
