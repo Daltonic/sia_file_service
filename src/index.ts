@@ -28,11 +28,14 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
 // Set up a route for file uploads
 app.post('/upload', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // if (!res.locals.user) {
-    //   next(
-    //     new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
-    //   )
-    // }
+    if (!res.locals.user) {
+      next(
+        new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
+      )
+    }
+
+    console.log(res.locals.user);
+    
 
     if (!req.files) {
       throw new HttpException(StatusCodes.NO_CONTENT, 'No file uploaded')
