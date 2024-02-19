@@ -29,7 +29,6 @@ app.post("/upload", async (req: Request, res: Response, next: NextFunction) => {
       throw new HttpException(StatusCodes.NO_CONTENT, "No file uploaded");
     }
     const fileUpload: FileUpload = req.files.file as FileUpload;
-    console.log(fileUpload);
 
     const result = await siaService.uploadFile(fileUpload);
     return res.status(StatusCodes.CREATED).json(result);
