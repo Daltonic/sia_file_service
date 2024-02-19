@@ -44,6 +44,7 @@ jobs:
             SIA_API_PASSWORD=${{ secrets.SIA_API_PASSWORD }}
             SIA_BASE_URL=${{ secrets.SIA_BASE_URL }}
             SIA_BUCKET=${{ secrets.SIA_BUCKET }}
+            ACCESS_TOKEN_SECRET_KEY=${{ secrets.ACCESS_TOKEN_SECRET_KEY }}
             EOF
 
   build_image:

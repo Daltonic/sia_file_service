@@ -7,6 +7,7 @@ import { StatusCodes } from 'http-status-codes'
 import HttpException from './utils/HttpExceptions'
 import SiaService from './services/sia.service'
 import BackgroundService from './services/background.service'
+import deserialiseUser from './middleware/deserialiseUser.middleware'
 
 const app = express()
 const port = process.env.PORT
@@ -14,6 +15,7 @@ const siaService = new SiaService()
 
 app.use(cors())
 app.use(fileupload())
+app.use(deserialiseUser)
 
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -26,9 +28,17 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
 // Set up a route for file uploads
 app.post('/upload', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    if (!res.locals.user) {
+      throw new HttpException(
+        StatusCodes.UNAUTHORIZED,
+        'Invalid Authorization Key'
+      )
+    }
+
     if (!req.files) {
       throw new HttpException(StatusCodes.NO_CONTENT, 'No file uploaded')
     }
+
     const fileUpload: FileUpload = req.files.file as FileUpload
 
     const result = await siaService.uploadFile(fileUpload)
@@ -39,8 +49,34 @@ app.post('/upload', async (req: Request, res: Response, next: NextFunction) => {
 })
 
 app.get(
+  '/download/image/:fileId',
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { fileId } = req.params
+    try {
+      if (!fileId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Folder or File ID not found' })
+      } else {
+        const folder = 'image'
+        const result = await siaService.downloadFile(folder, fileId)
+        return result.pipe(res).status(StatusCodes.OK)
+      }
+    } catch (error: any) {
+      next(new HttpException(StatusCodes.BAD_REQUEST, error.message))
+    }
+  }
+)
+
+app.get(
   '/download/:folder/:fileId',
   async (req: Request, res: Response, next: NextFunction) => {
+    if (!res.locals.user) {
+      next(
+        new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
+      )
+    }
+
     const { folder, fileId } = req.params
     try {
       if (!folder || !fileId) {

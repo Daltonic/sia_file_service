@@ -8,6 +8,7 @@ class BackgroundService {
   constructor() {
     this.cacheDir = path.resolve(__dirname, '..', '..', 'cache')
     this.dailyJobs()
+    console.log('Background jobs mounted...')
   }
 
   private dailyJobs(): void {
