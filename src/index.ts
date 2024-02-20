@@ -8,6 +8,9 @@ import HttpException from './utils/HttpExceptions'
 import SiaService from './services/sia.service'
 import BackgroundService from './services/background.service'
 import deserialiseUser from './middleware/deserialiseUser.middleware'
+import filterDomains from './middleware/filterDomains.middleware'
+import path from 'path'
+import fs from 'fs'
 
 const app = express()
 const port = process.env.PORT
@@ -15,7 +18,6 @@ const siaService = new SiaService()
 
 app.use(cors())
 app.use(fileupload())
-app.use(deserialiseUser)
 
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -26,29 +28,33 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
 })
 
 // Set up a route for file uploads
-app.post('/upload', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    if (!res.locals.user) {
-      next(
-        new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
-      )
+app.post(
+  '/upload',
+  deserialiseUser,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!res.locals.user) {
+        return next(
+          new HttpException(
+            StatusCodes.UNAUTHORIZED,
+            'Invalid Authorization Key'
+          )
+        )
+      }
+
+      if (!req.files) {
+        throw new HttpException(StatusCodes.NO_CONTENT, 'No file uploaded')
+      }
+
+      const fileUpload: FileUpload = req.files.file as FileUpload
+
+      const result = await siaService.uploadFile(fileUpload)
+      return res.status(StatusCodes.CREATED).json(result)
+    } catch (e: any) {
+      next(new HttpException(StatusCodes.BAD_REQUEST, e.message))
     }
-
-    console.log(res.locals.user);
-    
-
-    if (!req.files) {
-      throw new HttpException(StatusCodes.NO_CONTENT, 'No file uploaded')
-    }
-
-    const fileUpload: FileUpload = req.files.file as FileUpload
-
-    const result = await siaService.uploadFile(fileUpload)
-    return res.status(StatusCodes.CREATED).json(result)
-  } catch (e: any) {
-    next(new HttpException(StatusCodes.BAD_REQUEST, e.message))
   }
-})
+)
 
 app.get(
   '/download/image/:fileId',
@@ -72,12 +78,20 @@ app.get(
 
 app.get(
   '/download/:folder/:fileId',
+  filterDomains,
   async (req: Request, res: Response, next: NextFunction) => {
-    // if (!res.locals.user) {
-    //   next(
-    //     new HttpException(StatusCodes.UNAUTHORIZED, 'Invalid Authorization Key')
-    //   )
-    // }
+    if (!res.locals.whitelisted) {
+      const protectedContent = path.resolve(
+        __dirname,
+        '..',
+        'response_files',
+        '401.png'
+      )
+      return fs
+        .createReadStream(protectedContent)
+        .pipe(res)
+        .status(StatusCodes.UNAUTHORIZED)
+    }
 
     const { folder, fileId } = req.params
     try {

@@ -1,4 +1,4 @@
-name: Upload Service Deploy to Ubuntu VPS
+name: File Service Deploy to Ubuntu VPS
 
 on:
   push:
@@ -45,6 +45,7 @@ jobs:
             SIA_BASE_URL=${{ secrets.SIA_BASE_URL }}
             SIA_BUCKET=${{ secrets.SIA_BUCKET }}
             ACCESS_TOKEN_SECRET_KEY=${{ secrets.ACCESS_TOKEN_SECRET_KEY }}
+            DOMAIN_WHITELIST=${{ secrets.DOMAIN_WHITELIST }}
             EOF
 
   build_image:
