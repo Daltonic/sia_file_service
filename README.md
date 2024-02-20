@@ -1,6 +1,6 @@
 # SiaPeopleLearn File Service Documentation
 
-![Sia Renterd Uploaded Files](./screenshots/1.png)
+![Sia Renterd Uploaded Files](./screenshots/0.png)
 
 ## Overview
 
