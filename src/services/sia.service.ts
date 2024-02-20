@@ -28,7 +28,7 @@ class SiaService {
       const folder = file.mimetype.split('/')[0]
       const extension = file.mimetype.split('/')[1]
       const fileId = `${identifier}.${extension}`
-      
+
       const cacheDir = path.resolve(__dirname, '..', '..', 'cache')
       const localFilePath = path.join(cacheDir, folder, fileId)
 
@@ -89,36 +89,10 @@ class SiaService {
     folder: string,
     fileId: string
   ): Promise<NodeJS.ReadableStream> {
-    const cacheDir = path.resolve(__dirname, '..', '..', 'cache')
-    const localFilePath = path.join(cacheDir, folder, fileId)
+    const fileStream = await this.downloadFromSiaService(folder, fileId)
 
-    // Ensure the cache directory exists
-    if (!fs.existsSync(cacheDir)) {
-      fs.mkdirSync(cacheDir, { recursive: true })
-    }
-
-    // Ensure the folder directory exists
-    const folderDir = path.join(cacheDir, folder)
-    if (!fs.existsSync(folderDir)) {
-      fs.mkdirSync(folderDir, { recursive: true })
-    }
-
-    const fileExists = fs.existsSync(localFilePath)
-
-    if (fileExists) {
-      // If the file exists in the local cache, return it
-      return fs.createReadStream(localFilePath)
-    } else {
-      // If the file does not exist in the local cache, download it from the Sia service
-      const fileStream = await this.downloadFromSiaService(folder, fileId)
-
-      // Save the file to the local cache
-      const writeStream = fs.createWriteStream(localFilePath)
-      promisify(pipeline)(fileStream, writeStream)
-
-      // Return the file stream
-      return fileStream
-    }
+    // Return the file stream
+    return fileStream
   }
 
   private async downloadFromSiaService(
@@ -140,10 +114,46 @@ class SiaService {
     }
 
     try {
-      const response = await axios.request(config)
-      return response.data
+      const cacheDir = path.resolve(__dirname, '..', '..', 'cache')
+      const localFilePath = path.join(cacheDir, folder, fileId)
+
+      // Ensure the cache directory exists
+      if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true })
+      }
+
+      // Ensure the folder directory exists
+      const folderDir = path.join(cacheDir, folder)
+      if (!fs.existsSync(folderDir)) {
+        fs.mkdirSync(folderDir, { recursive: true })
+      }
+
+      // Save the file to the local cache
+      const fileExists = fs.existsSync(localFilePath)
+
+      if (fileExists) {
+        // If the file exists in the local cache, return it
+        return fs.createReadStream(localFilePath)
+      } else {
+        // Return the file stream
+        const response = await axios.request(config)
+        const writeStream = fs.createWriteStream(localFilePath)
+        promisify(pipeline)(response.data, writeStream)
+        return response.data
+      }
     } catch (e: any) {
       console.error(e)
+      if (e.response && e.response.status === 404) {
+        const notFound = path.resolve(
+          __dirname,
+          '..',
+          '..',
+          'response_files',
+          '404.png'
+        )
+        return fs.createReadStream(notFound)
+      } else {
+      }
       throw new Error(e.message || 'Error downloading file')
     }
   }
