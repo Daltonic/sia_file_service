@@ -94,6 +94,7 @@ app.get(
     }
 
     const { folder, fileId } = req.params
+    
     try {
       if (!folder || !fileId) {
         return res
