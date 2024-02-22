@@ -10,7 +10,15 @@ export default async function filterDomains(
   try {
     // Grab the request origin;
     const whitelist = process.env.DOMAIN_WHITELIST!
-    const origin = (req.headers.origin || req.headers.host) as string
+    const headers: { [key: string]: string } = {}
+
+    for (let i = 0; i < req.rawHeaders.length; i += 2) {
+      headers[req.rawHeaders[i]] = req.rawHeaders[i + 1].endsWith('/')
+        ? req.rawHeaders[i + 1].slice(0, -1)
+        : req.rawHeaders[i + 1]
+    }
+
+    const origin = headers.Referer
     const allowed = whitelist.includes(origin)
     res.locals.whitelisted = allowed
 
