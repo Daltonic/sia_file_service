@@ -17,12 +17,10 @@ export default async function filterDomains(
         ? req.rawHeaders[i + 1].slice(0, -1)
         : req.rawHeaders[i + 1]
     }
-    console.log(res.locals.whitelisted, headers.Referer)
     res.locals.whitelisted = whitelist.includes(headers.Referer)
 
     return next()
   } catch (error: any) {
-    // Handle the error appropriately, for example, by passing it to the next middleware
     next(new HttpException(StatusCodes.UNAUTHORIZED, error.message))
   }
 }

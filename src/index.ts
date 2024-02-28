@@ -80,18 +80,18 @@ app.get(
   '/download/:folder/:fileId',
   filterDomains,
   async (req: Request, res: Response, next: NextFunction) => {
-    // if (!res.locals.whitelisted) {
-    //   const protectedContent = path.resolve(
-    //     __dirname,
-    //     '..',
-    //     'response_files',
-    //     '401.png'
-    //   )
-    //   return fs
-    //     .createReadStream(protectedContent)
-    //     .pipe(res)
-    //     .status(StatusCodes.UNAUTHORIZED)
-    // }
+    if (!res.locals.whitelisted) {
+      const protectedContent = path.resolve(
+        __dirname,
+        '..',
+        'response_files',
+        '401.png'
+      )
+      return fs
+        .createReadStream(protectedContent)
+        .pipe(res)
+        .status(StatusCodes.UNAUTHORIZED)
+    }
 
     const { folder, fileId } = req.params
 
