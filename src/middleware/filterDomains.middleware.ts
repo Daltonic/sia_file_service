@@ -19,6 +19,10 @@ export default async function filterDomains(
     }
     res.locals.origin = headers.Referer
     res.locals.whitelisted = whitelist.includes(headers.Referer)
+
+    console.log(req.rawHeaders);
+    console.log(headers);
+    
     console.log(headers.Referer, 'whitelisted', res.locals.whitelisted)
 
     return next()
