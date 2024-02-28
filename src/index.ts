@@ -96,22 +96,19 @@ app.get(
     }
 
     const { folder, fileId } = req.params
-    return res
-          .status(StatusCodes.OK)
-          .json({ folder, fileId })
 
-    // try {
-    //   if (!folder || !fileId) {
-    //     return res
-    //       .status(StatusCodes.BAD_REQUEST)
-    //       .json({ message: 'Folder or File ID not found' })
-    //   } else {
-    //     const result = await siaService.downloadFile(folder, fileId)
-    //     return result.pipe(res).status(StatusCodes.OK)
-    //   }
-    // } catch (error: any) {
-    //   next(new HttpException(StatusCodes.BAD_REQUEST, error.message))
-    // }
+    try {
+      if (!folder || !fileId) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Folder or File ID not found' })
+      } else {
+        const result = await siaService.downloadFile(folder, fileId)
+        return result.pipe(res).status(StatusCodes.OK)
+      }
+    } catch (error: any) {
+      next(new HttpException(StatusCodes.BAD_REQUEST, error.message))
+    }
   }
 )
 
