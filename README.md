@@ -1,4 +1,4 @@
-# SiaPeopleLearn File Service Documentation
+# Sia File Service Documentation
 
 ![Sia Renterd Uploaded Files](./screenshots/0.png)
 
